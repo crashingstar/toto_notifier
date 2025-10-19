@@ -1,17 +1,17 @@
-FROM python:3.11-slim
+FROM mcr.microsoft.com/playwright/python:v1.47.0-jammy
 
 WORKDIR /app
-
-# Install Python deps and Playwright with Chromium and system deps
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt \
-    && python -m playwright install --with-deps chromium
 
 # Copy the application source
 COPY . /app
 
 # Ensure stdout/stderr are unbuffered for clear logs
 ENV PYTHONUNBUFFERED=1
+
+# Safety: ensure the Python package is present/up-to-date
+# (Base image already includes Playwright and browsers.)
+RUN python -m pip install --no-cache-dir -U pip setuptools wheel \
+    && python -m pip install --no-cache-dir -U playwright
 
 # Default command (Railway Schedule can override this with the job command)
 CMD ["python", "-m", "notifier.toto_main"]
